@@ -23,11 +23,7 @@ const localizer = dateFnsLocalizer({
 export default function CalendarPage() {
   const [events, setEvents] = useState([]);
   const [error, setError] = useState(null);
-
-  
   const [view, setView] = useState(Views.WEEK);
-
-  
   const [date, setDate] = useState(new Date());
 
   useEffect(() => {
@@ -55,7 +51,9 @@ export default function CalendarPage() {
 
       const mappedEvents = trainingsWithCustomer.map((t) => {
         const start = new Date(t.date);
-        const end = new Date(start.getTime() + Number(t.duration) * 60000);
+        const durationMinutes = Number(t.duration) || 0;
+
+        const end = new Date(start.getTime() + durationMinutes * 60000);
 
         const customerName = t.customer
           ? `${t.customer.firstname} ${t.customer.lastname}`
@@ -66,6 +64,7 @@ export default function CalendarPage() {
           title: `${t.activity} – ${customerName}`,
           start,
           end,
+          allDay: false,
         };
       });
 
@@ -81,34 +80,6 @@ export default function CalendarPage() {
     <div style={{ padding: 16, minHeight: '100vh' }}>
       <h2>Harjoituskalenteri</h2>
 
-      
-      <div style={{ display: 'flex', gap: 8, margin: '12px 0' }}>
-        <button onClick={() => setDate(new Date())}>Today</button>
-        <button
-          onClick={() => {
-            const d = new Date(date);
-            if (view === 'month') d.setMonth(d.getMonth() - 1);
-            else if (view === 'week') d.setDate(d.getDate() - 7);
-            else d.setDate(d.getDate() - 1);
-            setDate(d);
-          }}
-        >
-          Back
-        </button>
-        <button
-          onClick={() => {
-            const d = new Date(date);
-            if (view === 'month') d.setMonth(d.getMonth() + 1);
-            else if (view === 'week') d.setDate(d.getDate() + 7);
-            else d.setDate(d.getDate() + 1);
-            setDate(d);
-          }}
-        >
-          Next
-        </button>
-      </div>
-
-      
       <div
         style={{
           height: '70vh',
@@ -129,6 +100,7 @@ export default function CalendarPage() {
           onView={(nextView) => setView(nextView)}
           defaultView={Views.WEEK}
           culture="fi"
+          showMultiDayTimes
         />
       </div>
     </div>
