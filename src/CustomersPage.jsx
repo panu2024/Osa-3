@@ -181,6 +181,48 @@ export default function CustomersPage() {
     }
   }
 
+  const handleExportCsv = () => {
+    if (!customers || customers.length === 0) return;
+
+    const fields = [
+      'firstname',
+      'lastname',
+      'streetaddress',
+      'postcode',
+      'city',
+      'email',
+      'phone'
+    ];
+
+    const header = fields.join(';');
+
+    const rows = customers.map((customer) =>
+      fields
+        .map((field) => {
+          const value =
+            customer[field] != null ? customer[field].toString() : '';
+          const escaped = value.replace(/"/g, '""');
+          return `"${escaped}"`;
+        })
+        .join(';')
+    );
+
+    const csvContent = [header, ...rows].join('\n');
+
+    const blob = new Blob([csvContent], {
+      type: 'text/csv;charset=utf-8;'
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'customers.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const sorted = useMemo(() => {
     const nonEmpty = customers.filter(c => {
       const f = (c.firstname ?? '').trim();
@@ -221,6 +263,10 @@ export default function CustomersPage() {
   return (
     <div style={{ padding: 16, minHeight: '100vh' }}>
       <h2>Asiakkaat</h2>
+
+      <button onClick={handleExportCsv} style={{ marginBottom: 16 }}>
+        Vie asiakkaat CSV-tiedostoon
+      </button>
 
       <form
         onSubmit={handleNewCustomerSubmit}
